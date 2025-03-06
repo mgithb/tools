@@ -17,6 +17,9 @@ BOLD_WHITE    = "\033[1;37m"
 BRIGHT_GREEN  = "\033[92m"
 RESET         = "\033[0m"
 
+# Additional highlight for search matches (reverse video style)
+HIGHLIGHT_MATCH = "\033[7m"
+
 def highlight_modsec(text):
     """
     Apply ModSec syntax highlighting and additional colorization:
@@ -49,7 +52,6 @@ def highlight_modsec(text):
     text = re.sub(r'\b(tx:)', lambda m: BOLD_MAGENTA + m.group(1) + RESET, text, flags=re.IGNORECASE)
     
     # Highlight transformation tokens that start with t: EXCEPT "t:none"
-    # Negative lookahead (?!none\b) ensures we skip t:none
     text = re.sub(r'\bt:(?!none\b)[^,"\s]+\b', YELLOW + r'\g<0>' + RESET, text)
     
     # Highlight the operator "||"
@@ -86,7 +88,10 @@ for filepath in glob.glob(path_pattern):
                 if block:
                     block_text = "".join(block)
                     if pattern.search(block_text):
+                        # Apply modsec syntax highlighting
                         highlighted = highlight_modsec(block_text)
+                        # Additionally, highlight the search matches using reverse video
+                        highlighted = pattern.sub(lambda m: HIGHLIGHT_MATCH + m.group(0) + RESET, highlighted)
                         print(f"== {os.path.basename(filepath)} ==")
                         print(highlighted)
                         print()
@@ -97,6 +102,7 @@ for filepath in glob.glob(path_pattern):
             block_text = "".join(block)
             if pattern.search(block_text):
                 highlighted = highlight_modsec(block_text)
+                highlighted = pattern.sub(lambda m: HIGHLIGHT_MATCH + m.group(0) + RESET, highlighted)
                 print(f"== {os.path.basename(filepath)} ==")
                 print(highlighted)
-                print()% 
+                print()
